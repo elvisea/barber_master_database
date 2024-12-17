@@ -28,14 +28,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Passo para configurar o Docker e Docker Compose
-      - name: Set up Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose --version  # Verifica se o docker-compose foi instalado corretamente
+      # Passo removido: instalação do Docker e Docker Compose no runner do GitHub
 
       - name: Create SSH key
         run: |
