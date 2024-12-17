@@ -2,24 +2,67 @@ name: Deploy Database
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main, develop ]
+    paths:
+      - 'docker-compose.yml'         # Aciona a pipeline se houver alterações no docker-compose.yml
+      - '.github/workflows/deploy.yml'  # Aciona a pipeline se houver alterações no arquivo de deploy.yml
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'docker-compose.yml'         # Aciona a pipeline para alterações no docker-compose.yml
+      - '.github/workflows/deploy.yml'  # Aciona a pipeline para alterações no arquivo de deploy.yml
+
+env:
+  POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+  POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+  POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+  DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{ secrets.POSTGRES_PORT }}/${{ secrets.POSTGRES_DB }}?schema=public
 
 jobs:
   deploy:
+    name: Deploy to Production
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
+      # Passo para configurar o Docker e Docker Compose
+      - name: Set up Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version  # Verifica se o docker-compose foi instalado corretamente
 
-    - name: Build and deploy Postgres container
-      run: |
-        docker-compose --env-file .env up -d
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Test connection to PostgreSQL
-      run: |
-        docker exec -it ${CONTAINER_NAME_DATABASE} pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      - name: Transfer Docker Compose to Server
+        run: |
+          scp -v -i ~/.ssh/deploy_key -P ${{ secrets.REMOTE_PORT }} \
+            docker-compose.yml \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}
+
+      - name: Deploy Database using Docker Compose
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.REMOTE_PORT }} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "\
+            cd ${{ secrets.REMOTE_TARGET }} && \
+            echo \"POSTGRES_USER=${{ secrets.POSTGRES_USER }}\" > .env && \
+            echo \"POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}\" >> .env && \
+            echo \"POSTGRES_DB=${{ secrets.POSTGRES_DB }}\" >> .env && \
+            echo \"POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}\" >> .env && \
+            echo \"POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}\" >> .env && \
+            echo \"DATABASE_URL=${{ env.DATABASE_URL }}\" >> .env && \
+            docker-compose -f docker-compose.yml up -d postgres && \
+            echo 'Database deployed successfully'"
+
+      - name: Cleanup
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
