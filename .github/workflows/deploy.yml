@@ -19,7 +19,6 @@ env:
   POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
   POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
   CONTAINER_NAME_DATABASE: ${{ secrets.CONTAINER_NAME_DATABASE }}
-  DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{ secrets.POSTGRES_PORT }}/${{ secrets.POSTGRES_DB }}?schema=public
 
 jobs:
   deploy:
@@ -54,7 +53,6 @@ jobs:
             echo \"POSTGRES_DB=${{ secrets.POSTGRES_DB }}\" >> .env && \
             echo \"POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}\" >> .env && \
             echo \"POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}\" >> .env && \
-            echo \"DATABASE_URL=${{ env.DATABASE_URL }}\" >> .env && \
             docker-compose -f docker-compose.yml up -d postgres && \
             echo 'Database deployed successfully'"
 
