@@ -14,7 +14,6 @@ on:
 
 env:
   POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-  POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
   POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
   POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
   POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
@@ -52,7 +51,6 @@ jobs:
             echo \"POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}\" >> .env && \
             echo \"POSTGRES_DB=${{ secrets.POSTGRES_DB }}\" >> .env && \
             echo \"POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}\" >> .env && \
-            echo \"POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}\" >> .env && \
             docker compose -f docker-compose.yml up -d postgres && \
             echo 'Database deployed successfully'"
 
