@@ -18,7 +18,6 @@ env:
   POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
   POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
   CONTAINER_NAME_DATABASE: ${{ secrets.CONTAINER_NAME_DATABASE }}
-  POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
 
 jobs:
   deploy:
@@ -50,10 +49,9 @@ jobs:
             echo \"POSTGRES_USER=${{ secrets.POSTGRES_USER }}\" > .env && \
             echo \"POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}\" >> .env && \
             echo \"POSTGRES_DB=${{ secrets.POSTGRES_DB }}\" >> .env && \
-            echo \"POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}\" >> .env && \
             echo \"CONTAINER_NAME_DATABASE=${{ secrets.CONTAINER_NAME_DATABASE }}\" >> .env && \
             echo \"POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}\" >> .env && \
-            docker compose -f docker-compose.yml up -d postgres && \
+            docker compose -f docker-compose.yml up -d && \
             echo 'Database deployed successfully'"
 
       - name: Cleanup
