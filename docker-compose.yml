@@ -1,15 +1,15 @@
 services:
-  postgres:
+  postgres_barber_master:
     image: postgres:latest
     container_name: ${CONTAINER_NAME_DATABASE}
     ports:
-      - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_INTERNAL_PORT}"  
+      - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_INTERNAL_PORT}"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - data:/var/lib/postgresql/data
+      - data_barber_master:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -19,5 +19,5 @@ services:
       timeout: 5s
 
 volumes:
-  data:
+  data_barber_master:
     driver: local
