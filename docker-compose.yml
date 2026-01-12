@@ -1,5 +1,5 @@
 services:
-  postgres_barber_master:
+  postgres_barber_shop_manager:
     image: postgres:latest
     container_name: ${CONTAINER_NAME_DATABASE}
     ports:
@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - data_barber_master:/var/lib/postgresql/data
+      - barber_shop_manager_db_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -21,7 +21,7 @@ services:
       - barber_shop_manager_network
 
 volumes:
-  data_barber_master:
+  barber_shop_manager_db_data:
     driver: local
 
 networks:
