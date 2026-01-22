@@ -1,6 +1,6 @@
 services:
   postgres_barber_shop_manager:
-    image: postgres:latest
+    image: postgres:18
     container_name: ${CONTAINER_NAME_DATABASE}
     ports:
       - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_INTERNAL_PORT}"
@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - barber_shop_manager_db_data:/var/lib/postgresql/data
+      - barber_shop_manager_db_data:/var/lib/postgresql
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
